@@ -1,0 +1,147 @@
+{
+  "participants": [
+    {
+      "participant_id": "P001",
+      "sex": "M",
+      "age": 6.5,
+      "diagnosis": "ASD",
+      "site": "SiteA",
+      "available_modalities": ["T1", "rs-fMRI", "16S", "metabolomics"],
+      "latest_visit_date": "2024-06-01"
+    },
+    {
+      "participant_id": "P002",
+      "sex": "F",
+      "age": 5.0,
+      "diagnosis": "TD",
+      "site": "SiteB",
+      "available_modalities": ["T1", "16S"],
+      "latest_visit_date": "2024-05-20"
+    },
+    {
+      "participant_id": "P003",
+      "sex": "M",
+      "age": 8.1,
+      "diagnosis": "ASD",
+      "site": "SiteA",
+      "available_modalities": ["T1", "DTI"],
+      "latest_visit_date": "2024-04-10"
+    },
+    {
+      "participant_id": "P004",
+      "sex": "F",
+      "age": 7.2,
+      "diagnosis": "Other",
+      "site": "SiteC",
+      "available_modalities": ["metabolomics"],
+      "latest_visit_date": "2024-03-05"
+    },
+    {
+      "participant_id": "P005",
+      "sex": "M",
+      "age": 9.0,
+      "diagnosis": "TD",
+      "site": "SiteB",
+      "available_modalities": ["T1", "rs-fMRI", "16S"],
+      "latest_visit_date": "2024-01-15"
+    },
+    {
+      "participant_id": "P006",
+      "sex": "F",
+      "age": 6.0,
+      "diagnosis": "ASD",
+      "site": "SiteA",
+      "available_modalities": ["T1", "16S", "metabolomics"],
+      "latest_visit_date": "2024-02-20"
+    }
+  ],
+  "files": [
+    {
+      "file_id": "F001",
+      "participant_id": "P001",
+      "visit_id": "V001",
+      "modality": "T1",
+      "file_name": "sub-P001_ses-01_T1w.nii.gz",
+      "type": "raw",
+      "format": "NIfTI",
+      "size_bytes": 12345678,
+      "checksum_md5": "abcdef123456",
+      "access_level": "open",
+      "download_url": "http://example.com/downloads/sub-P001_T1.nii.gz"
+    },
+    {
+      "file_id": "F002",
+      "participant_id": "P001",
+      "visit_id": "V001",
+      "modality": "16S",
+      "file_name": "sub-P001_ses-01_16S.fastq.gz",
+      "type": "raw",
+      "format": "FASTQ",
+      "size_bytes": 2345678,
+      "checksum_md5": "012345abcdef",
+      "access_level": "open",
+      "download_url": "http://example.com/downloads/sub-P001_16S.fastq.gz"
+    },
+    {
+      "file_id": "F003",
+      "participant_id": "P002",
+      "visit_id": "V001",
+      "modality": "T1",
+      "file_name": "sub-P002_ses-01_T1w.nii.gz",
+      "type": "raw",
+      "format": "NIfTI",
+      "size_bytes": 11345678,
+      "checksum_md5": "ff12aa3456",
+      "access_level": "open",
+      "download_url": "http://example.com/downloads/sub-P002_T1.nii.gz"
+    },
+    {
+      "file_id": "F004",
+      "participant_id": "P003",
+      "visit_id": "V002",
+      "modality": "DTI",
+      "file_name": "sub-P003_ses-02_dti.nii.gz",
+      "type": "raw",
+      "format": "NIfTI",
+      "size_bytes": 42345678,
+      "checksum_md5": "ccdd998877",
+      "access_level": "open",
+      "download_url": "http://example.com/downloads/sub-P003_DTI.nii.gz"
+    },
+    {
+      "file_id": "F005",
+      "participant_id": "P005",
+      "visit_id": "V001",
+      "modality": "16S",
+      "file_name": "sub-P005_ses-01_16S.fastq.gz",
+      "type": "raw",
+      "format": "FASTQ",
+      "size_bytes": 3234567,
+      "checksum_md5": "bbaa332211",
+      "access_level": "open",
+      "download_url": "http://example.com/downloads/sub-P005_16S.fastq.gz"
+    },
+    {
+      "file_id": "F006",
+      "participant_id": "P006",
+      "visit_id": "V001",
+      "modality": "metabolomics",
+      "file_name": "sub-P006_ses-01_metabo.mzML",
+      "type": "raw",
+      "format": "mzML",
+      "size_bytes": 5234567,
+      "checksum_md5": "aa55667788",
+      "access_level": "open",
+      "download_url": "http://example.com/downloads/sub-P006_metabo.mzML"
+    },
+    {
+      "file_id": "F007",
+      "participant_id": "P006",
+      "modality": "metabolomics",
+      "file_name": "sub-P006_ses-01_metabo.mzML",
+      "type": "preprocessed",
+      "processing": { "pipeline": "XPipeline", "version": "v1.2", "qc": "pass" },
+      "download_url": "http://example.com/downloads/sub-P006_metabo_preprocessed.mzML"
+    }
+  ]
+}
