@@ -6,9 +6,11 @@ export default function Subject() {
   const { id } = useParams();
   const [p, setP] = useState(null);
   const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function load() {
+      setLoading(true);
       try {
         const part = await getParticipantById(id);
         setP(part);
@@ -16,6 +18,8 @@ export default function Subject() {
         setFiles(fs);
       } catch (e) {
         console.error(e);
+      } finally {
+        setLoading(false);
       }
     }
     load();
@@ -33,7 +37,6 @@ export default function Subject() {
       ? new Blob([toCSV(manifest)], { type: 'text/csv' })
       : new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
 
-    // 使用标准的 URL 对象（不要用中文）
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -49,11 +52,11 @@ export default function Subject() {
     return lines.join('\n');
   }
 
-  if (!p) return <div className="card">加载中...</div>;
+  if (loading || !p) return <div className="card">加载中...</div>;
 
   return (
     <div>
-      <div className="card">
+      <div className="card fade-in">
         <h2>受试者详情 · {p.participant_id}</h2>
         <div style={{display:'flex', gap:24, flexWrap:'wrap'}}>
           <div>
@@ -75,8 +78,16 @@ export default function Subject() {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card fade-in" style={{ marginTop:12 }}>
         <h3>该受试者的数据文件</h3>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+          <div className="small">共 {files.length} 个文件</div>
+          <div style={{ display:'flex', gap:8 }}>
+            <button className="btn btn-primary" onClick={() => exportManifest('json')}>导出 Manifest (JSON)</button>
+            <button className="btn btn-ghost" onClick={() => exportManifest('csv')}>导出 CSV</button>
+          </div>
+        </div>
+
         <ul className="file-list">
           {files.map(f => (
             <li key={f.file_id}>
@@ -85,17 +96,11 @@ export default function Subject() {
                 <div className="small">{f.modality} · {f.format} · {Math.round((f.size_bytes||0)/1024)} KB</div>
               </div>
               <div style={{display:'flex', gap:8, alignItems:'center'}}>
-                <a href={f.download_url} target="_blank" rel="noreferrer" className="btn btn-ghost">下载</a>
-                <div className="small">MD5: {f.checksum_md5}</div>
+                <a className="btn btn-ghost" href={f.download_url} target="_blank" rel="noreferrer">下载</a>
               </div>
             </li>
           ))}
         </ul>
-
-        <div style={{marginTop:12}}>
-          <button className="btn btn-primary" onClick={() => exportManifest('json')}>导出 manifest (JSON)</button>
-          <button className="btn btn-ghost" onClick={() => exportManifest('csv')}>导出 CSV</button>
-        </div>
       </div>
     </div>
   );

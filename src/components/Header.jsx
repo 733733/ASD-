@@ -1,12 +1,15 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 export default function Header({ rawCount = 0, preCount = 0 }) {
+  // 始终使用 scrolled 样式（即固定蓝色导航）
+  const linkClass = ({ isActive }) => isActive ? 'active' : '';
+
   return (
-    <header className="header">
+    <header className={`header scrolled`} aria-hidden={false}>
       <div className="inner">
-        <div className="brand">
-          <div className="logo">
+        <div className="brand" role="banner">
+          <div className="logo" aria-hidden>
             <img src="/logo.png" alt="Database Logo" />
           </div>
           <div className="brand-text">
@@ -15,17 +18,19 @@ export default function Header({ rawCount = 0, preCount = 0 }) {
           </div>
         </div>
 
-        <nav className="nav">
-          <Link to="/">首页</Link>
-          <Link to="/browse">浏览</Link>
-          <Link to="/search">搜索</Link>
+        <nav className="nav" aria-label="主导航">
+          <NavLink to="/" className={linkClass}>首页</NavLink>
+          <NavLink to="/browse" className={linkClass}>浏览</NavLink>
+          <NavLink to="/search" className={linkClass}>搜索</NavLink>
+          <NavLink to="/download" className={linkClass}>数据下载</NavLink>
+          <NavLink to="/docs" className={linkClass}>帮助文档</NavLink>
 
-          <Link to="/browse?datatype=raw" className="module-btn" style={{ marginLeft: 12 }}>
+          <NavLink to="/browse?datatype=raw" className="module-btn" style={{ marginLeft: 12 }}>
             原始数据 <span className="badge" style={{ marginLeft:8 }}>{rawCount}</span>
-          </Link>
-          <Link to="/browse?datatype=preprocessed" className="module-btn" style={{ marginLeft:8 }}>
+          </NavLink>
+          <NavLink to="/browse?datatype=preprocessed" className="module-btn" style={{ marginLeft:8 }}>
             预处理数据 <span className="badge" style={{ marginLeft:8 }}>{preCount}</span>
-          </Link>
+          </NavLink>
         </nav>
       </div>
     </header>

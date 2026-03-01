@@ -17,18 +17,20 @@ export default function Browse() {
   const [modality, setModality] = useState('');
   const [filesByModality, setFilesByModality] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  // read query param for datatype if present (not used to filter here but preserved)
+  // read query param for datatype if present
   const location = useLocation();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const datatype = params.get('datatype');
-    // future: use datatype to filter; for now we just keep it visible
+    // preserve datatype if needed; not used as filter here
   }, [location.search]);
 
   useEffect(() => {
     async function load() {
+      setLoading(true);
       try {
         const ps = await getParticipants();
         setParticipants(ps);
@@ -36,6 +38,8 @@ export default function Browse() {
         setModalities(ms);
       } catch (e) {
         console.error(e);
+      } finally {
+        setLoading(false);
       }
     }
     load();
@@ -44,11 +48,14 @@ export default function Browse() {
   useEffect(() => {
     async function loadFiles() {
       if (viewMode === 'modality' && modality) {
+        setLoading(true);
         try {
           const fs = await getFiles({ modality });
           setFilesByModality(fs);
         } catch (e) {
           console.error(e);
+        } finally {
+          setLoading(false);
         }
       } else {
         setFilesByModality([]);
@@ -88,24 +95,14 @@ export default function Browse() {
     } catch (e) { console.error(e); alert('导出失败'); }
   }
 
-  function exportSelectedFiles(format = 'json') {
-    const ids = Object.entries(selectedFiles).filter(([k,v]) => v).map(([k]) => k);
-    if (ids.length === 0) { alert('请先选择至少一个文件'); return; }
-    const files = filesByModality.filter(f => ids.includes(f.file_id));
-    const manifest = files.map(f => ({
-      file_id: f.file_id, participant_id: f.participant_id, file_name: f.file_name, modality: f.modality, download_url: f.download_url
-    }));
-    downloadBlob(manifest, format, 'manifest_files');
-  }
-
-  function downloadBlob(manifest, format, baseName) {
+  function downloadBlob(manifest, format, prefix) {
     const blob = format === 'csv'
       ? new Blob([toCSV(manifest)], { type: 'text/csv' })
       : new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${baseName}.${format === 'csv' ? 'csv' : 'json'}`;
+    a.download = `${prefix}.${format === 'csv' ? 'csv' : 'json'}`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -117,112 +114,76 @@ export default function Browse() {
     return lines.join('\n');
   }
 
-  const selectedParticipantCount = Object.values(selectedParticipants).filter(Boolean).length;
-  const selectedFileCount = Object.values(selectedFiles).filter(Boolean).length;
-
   return (
-    <div className="container">
-      <h2 style={{ marginTop: 8 }}>浏览受试者</h2>
-
-      <div className="card" style={{ marginBottom: 20 }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap:'wrap' }}>
-          <div>
-            <label className="small">视图</label><br />
+    <div>
+      <div className="card" style={{ marginBottom:12 }}>
+        <div style={{ display:'flex', gap:12, alignItems:'center', flexWrap:'wrap' }}>
+          <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+            <label className="small">视图：</label>
             <select className="select" value={viewMode} onChange={e => setViewMode(e.target.value)}>
-              <option value="participants">按受试者浏览</option>
-              <option value="modality">按模态浏览</option>
+              <option value="participants">按受试者</option>
+              <option value="modality">按模态</option>
             </select>
           </div>
 
           {viewMode === 'participants' && (
             <>
-              <div>
-                <label className="small">诊断筛选</label><br />
-                <select className="select" value={diagnosis} onChange={e => { setDiagnosis(e.target.value); setPage(1); }}>
-                  <option value="">全部</option>
-                  <option value="ASD">ASD</option>
-                  <option value="TD">TD</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="small">最小年龄</label><br />
-                <input type="number" className="select" value={minAge} onChange={e => { setMinAge(e.target.value); setPage(1); }} placeholder="例如 6" />
-              </div>
-
-              <div style={{ marginLeft: 'auto', display:'flex', gap:8, alignItems:'center' }}>
-                <div className="small">{selectedParticipantCount} 个已选</div>
-                <button className="btn btn-primary" onClick={() => exportSelectedParticipants('json')}>导出所选 manifest (JSON)</button>
-                <button className="btn btn-ghost" onClick={() => exportSelectedParticipants('csv')}>导出 CSV</button>
+              <select className="select" value={diagnosis} onChange={e => setDiagnosis(e.target.value)}>
+                <option value="">所有诊断</option>
+                <option value="ASD">ASD</option>
+                <option value="TD">TD</option>
+              </select>
+              <input className="select" style={{width:120}} type="number" placeholder="最小年龄" value={minAge} onChange={e => setMinAge(e.target.value)} />
+              <div style={{ marginLeft:'auto', display:'flex', gap:8 }}>
+                <button className="btn btn-primary" onClick={() => exportSelectedParticipants('json')}>导出选中受试者 Manifest</button>
               </div>
             </>
           )}
 
           {viewMode === 'modality' && (
             <>
-              <div>
-                <label className="small">选择模态</label><br />
-                <select className="select" value={modality} onChange={e => { setModality(e.target.value); setSelectedFiles({}); }}>
-                  <option value="">请选择</option>
-                  {modalities.map(m => <option key={m} value={m}>{m}</option>)}
-                </select>
-              </div>
-
-              <div style={{ marginLeft: 'auto', display:'flex', gap:8, alignItems:'center' }}>
-                <div className="small">{selectedFileCount} 个文件已选</div>
-                <button className="btn btn-primary" onClick={() => exportSelectedFiles('json')}>导出所选文件 (JSON)</button>
-                <button className="btn btn-ghost" onClick={() => exportSelectedFiles('csv')}>导出 CSV</button>
-              </div>
+              <select className="select" value={modality} onChange={e => setModality(e.target.value)}>
+                <option value="">选择模态</option>
+                {modalities.map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
             </>
           )}
         </div>
       </div>
 
-      {viewMode === 'participants' && (
-        <div className="card">
-          {pageItems.map(p => (
-            <div key={p.participant_id} className="fade-in">
-              <ParticipantCard p={p} checked={selectedParticipants[p.participant_id]} onCheck={handleCheckParticipant} />
+      <div className="grid-cards">
+        {loading && <div className="card" style={{ display:'flex', alignItems:'center', justifyContent:'center' }}><div className="spinner" /></div>}
+        {!loading && viewMode === 'participants' && pageItems.map(p => (
+          <ParticipantCard key={p.participant_id} p={p} checked={!!selectedParticipants[p.participant_id]} onCheck={handleCheckParticipant} />
+        ))}
+        {!loading && viewMode === 'participants' && filtered.length === 0 && <div className="card">暂无受试者</div>}
+
+        {!loading && viewMode === 'modality' && filesByModality.map(f => (
+          <div key={f.file_id} className="card fade-in" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <div>
+              <div style={{ fontWeight:700 }}>{f.file_name}</div>
+              <div className="small">{f.modality} · {f.format}</div>
             </div>
-          ))}
-
-          <div className="pagination">
-            <button className="pager" onClick={() => setPage(1)} disabled={page===1}>首页</button>
-            <button className="pager" onClick={() => setPage(prev => Math.max(1, prev-1))} disabled={page===1}>上一页</button>
-            <div className="small">第 {page} / {totalPages} 页</div>
-            <button className="pager" onClick={() => setPage(prev => Math.min(totalPages, prev+1))} disabled={page===totalPages}>下一页</button>
-            <button className="pager" onClick={() => setPage(totalPages)} disabled={page===totalPages}>尾页</button>
+            <div style={{ display:'flex', gap:8 }}>
+              <label style={{ display:'flex', alignItems:'center', gap:8 }}>
+                <input type="checkbox" checked={!!selectedFiles[f.file_id]} onChange={e => handleCheckFile(f.file_id, e.target.checked)} />
+                选择
+              </label>
+              <a className="btn btn-ghost" href={f.download_url} target="_blank" rel="noreferrer">下载</a>
+            </div>
           </div>
+        ))}
+      </div>
+
+      {/* 分页 */}
+      {viewMode === 'participants' && (
+        <div style={{ marginTop: 16, display:'flex', justifyContent:'center', gap:8, alignItems:'center' }}>
+          <button className="btn btn-ghost" onClick={() => setPage(p => Math.max(1, p-1))}>上一页</button>
+          <div className="small">第 {page} / {totalPages} 页</div>
+          <button className="btn btn-ghost" onClick={() => setPage(p => Math.min(totalPages, p+1))}>下一页</button>
         </div>
       )}
 
-      {viewMode === 'modality' && (
-        <div className="card">
-          <h3>模态：{modality || '-'}</h3>
-          {!modality && <div className="small">请选择一个模态以查看对应的数据文件</div>}
-          {modality && filesByModality.length === 0 && <div className="small">该模态当前无文件</div>}
-          {modality && filesByModality.length > 0 && (
-            <ul className="file-list" style={{ marginTop: 8 }}>
-              {filesByModality.map(f => (
-                <li key={f.file_id}>
-                  <div>
-                    <div style={{ fontWeight:700 }}>{f.file_name}</div>
-                    <div className="small">{f.participant_id} · {f.modality} · {f.format}</div>
-                  </div>
-                  <div style={{ display:'flex', gap:10, alignItems:'center' }}>
-                    <label style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
-                      <input type="checkbox" checked={!!selectedFiles[f.file_id]} onChange={e => handleCheckFile(f.file_id, e.target.checked)} />
-                      选中
-                    </label>
-                    <a href={f.download_url} target="_blank" rel="noreferrer" className="btn btn-ghost">下载</a>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
     </div>
   );
 }

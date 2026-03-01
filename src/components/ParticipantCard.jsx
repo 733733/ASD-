@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export default function ParticipantCard({ p, checked = false, onCheck = () => {} }) {
   return (
-    <div className="card part-card">
+    <div className="card part-card fade-in" role="article" aria-label={`受试者 ${p.participant_id}`}>
       <div className="part-left">
         <div className="avatar">{p.participant_id}</div>
         <div>

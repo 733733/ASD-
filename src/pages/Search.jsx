@@ -7,15 +7,23 @@ export default function Search() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState({});
+  const [minAge, setMinAge] = useState('');
+  const [maxAge, setMaxAge] = useState('');
+  const [diagnosis, setDiagnosis] = useState('');
 
   async function doSearch() {
     setLoading(true);
     try {
       const res = await getParticipants({ q });
-      const filtered = (res || []).filter(p => {
-        if (!q) return true;
-        const text = (p.participant_id + ' ' + p.site + ' ' + p.diagnosis).toLowerCase();
-        return text.includes(q.toLowerCase());
+      let filtered = (res || []).filter(p => {
+        if (q) {
+          const text = (p.participant_id + ' ' + p.site + ' ' + p.diagnosis).toLowerCase();
+          if (!text.includes(q.toLowerCase())) return false;
+        }
+        if (diagnosis && p.diagnosis !== diagnosis) return false;
+        if (minAge && p.age < Number(minAge)) return false;
+        if (maxAge && p.age > Number(maxAge)) return false;
+        return true;
       });
       setResults(filtered);
     } catch (e) {
@@ -26,10 +34,7 @@ export default function Search() {
     }
   }
 
-  useEffect(() => {
-    doSearch();
-    // eslint-disable-next-line
-  }, []);
+  useEffect(() => { doSearch(); }, []); // load once
 
   function handleCheck(id, checked) {
     setSelected(prev => ({ ...prev, [id]: checked }));
@@ -81,24 +86,43 @@ export default function Search() {
       <h2>搜索受试者</h2>
 
       <div className="card">
-        <div style={{display:'flex', gap:8, alignItems:'center'}}>
-          <input className="select" style={{flex:1}} type="text" placeholder="输入受试者ID、站点或诊断（例如 P001 或 SiteA）" value={q} onChange={e => setQ(e.target.value)} />
-          <button className="btn btn-primary" onClick={doSearch}>搜索</button>
-        </div>
+        <div style={{display:'flex', gap:12, alignItems:'center', flexWrap:'wrap'}}>
+          <input className="select" style={{flex:'1 1 520px'}} type="text" placeholder="输入受试者ID、站点或诊断（例如 P001 或 SiteA）" value={q} onChange={e => setQ(e.target.value)} />
+          <input className="select" style={{width:100}} type="number" placeholder="最小年龄" value={minAge} onChange={e => setMinAge(e.target.value)} />
+          <input className="select" style={{width:100}} type="number" placeholder="最大年龄" value={maxAge} onChange={e => setMaxAge(e.target.value)} />
+          <select className="select" value={diagnosis} onChange={e => setDiagnosis(e.target.value)} style={{width:160}}>
+            <option value="">所有诊断</option>
+            <option value="ASD">ASD</option>
+            <option value="TD">TD</option>
+          </select>
 
-        <div style={{marginTop:12, display:'flex', gap:8, alignItems:'center'}}>
-          <div className="small">{selectedCount} 个已选</div>
-          <button className="btn btn-primary" onClick={() => exportSelectedManifest('json')}>导出所选 manifest (JSON)</button>
-          <button className="btn btn-ghost" onClick={() => exportSelectedManifest('csv')}>导出 CSV</button>
+          <div style={{display:'flex', gap:8, marginLeft:'auto', alignItems:'center'}}>
+            <button className="btn btn-primary" onClick={doSearch}>
+              {loading ? <div className="spinner" /> : '搜索'}
+            </button>
+            <button className="btn btn-ghost" onClick={() => { setQ(''); setMinAge(''); setMaxAge(''); setDiagnosis(''); setSelected({}); doSearch(); }}>
+              清除
+            </button>
+          </div>
         </div>
       </div>
 
-      <div style={{ marginTop: 12 }}>
-        {loading && <div className="small">搜索中...</div>}
+      <div style={{ height: 12 }} />
+
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+        <div className="small">结果：{results.length} 条</div>
+        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+          <div className="small">已选择：{selectedCount}</div>
+          <button className="btn btn-primary" onClick={() => exportSelectedManifest('json')}>导出 Manifest (JSON)</button>
+        </div>
+      </div>
+
+      <div className="grid-cards">
+        {loading && <div className="card" style={{ display:'flex', alignItems:'center', justifyContent:'center' }}><div className="spinner" /></div>}
         {!loading && results.map(p => (
-          <ParticipantCard key={p.participant_id} p={p} checked={selected[p.participant_id]} onCheck={handleCheck} />
+          <ParticipantCard key={p.participant_id} p={p} checked={!!selected[p.participant_id]} onCheck={handleCheck} />
         ))}
-        {!loading && results.length === 0 && <div className="small">无结果</div>}
+        {!loading && results.length === 0 && <div className="card">未找到匹配结果。</div>}
       </div>
     </div>
   );
