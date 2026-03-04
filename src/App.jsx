@@ -7,6 +7,8 @@ import Browse from './pages/Browse';
 import Search from './pages/Search';
 import Subject from './pages/Subject';
 import Help from './pages/Help';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 export default function App() {
   return (
@@ -20,6 +22,8 @@ export default function App() {
           <Route path="/subject/:id" element={<Subject />} />
           <Route path="/download" element={<div className="card">数据下载页面（占位）</div>} />
           <Route path="/docs" element={<Help />} />
+		  <Route path="/login" element={<Login />} />
+		  <Route path="/register" element={<Register />} />
         </Routes>
       </main>
       <Footer />

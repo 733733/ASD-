@@ -45,7 +45,7 @@ export default function Help() {
             <p>在“搜索”页面，你可以：</p>
             <ul>
               <li>通过输入受试者 ID、站点名称或诊断关键词进行全文模糊搜索。</li>
-              <li>使用年龄区间与诊断筛选结果，支持多��并可批量勾选导出 manifest。</li>
+              <li>使用年龄区间与诊断筛选结果，支持多选并可批量勾选导出 manifest。</li>
               <li>当搜索结果较多时，可使用浏览页进行分页查看并精细筛选。</li>
             </ul>
           </div>
@@ -92,7 +92,7 @@ export default function Help() {
 
           <div className="card" style={{ marginTop:12 }}>
             <h3 id="contact">7. 联系我们</h3>
-            <p>如需帮助或合作，请发邮件至：psycmg@example.edu（示例邮箱），邮件主题请注明 “ASD 数据库 请求 / 问题”。</p>
+            <p>如需帮助或合作，请发邮件至：2680240798@qq.com，邮件主题请注明 “ASD 数据库 请求 / 问题”。</p>
           </div>
 
           <div className="card" style={{ marginTop:12 }}>
@@ -105,7 +105,7 @@ export default function Help() {
               <dd>A：请确保你有访问该数据的权限，某些受控数据需要登录或授权 token。</dd>
 
               <dt>Q：如何引用本数据？</dt>
-              <dd>A：请按照 6. 数据引用与协议 中的示例在论文与报告中注明来源，并标注 DOI。</dd>
+              <dd>A：请按照数据引用与协议 中的示例在论文与报告中注明来源，并标注 DOI。</dd>
             </dl>
           </div>
         </main>

@@ -81,7 +81,12 @@ export default function Browse() {
     setSelectedFiles(prev => ({ ...prev, [id]: checked }));
   }
 
-  async function exportSelectedParticipants(format = 'json') {
+  async function exportSelectedParticipants(format = 'json') {const user = JSON.parse(localStorage.getItem('userInfo') || 'null');
+  if (!user) {
+    alert('请先登录后再下载/导出数据');
+    window.location.href = '/login';
+    return;
+  }
     const ids = Object.entries(selectedParticipants).filter(([k,v]) => v).map(([k]) => k);
     if (ids.length === 0) { alert('请先选择至少一个受试者'); return; }
     try {

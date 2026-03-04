@@ -11,7 +11,7 @@ export default function Footer() {
               © 2024-2026 AGBA。保留所有权利。若需合作或数据访问，请联系：2680240798@qq.com（示例邮箱）。
             </div>
             <div className="small" style={{ marginTop:8 }}>
-              数据引用示例：作者等., PsycGM ASD Database, 2026. DOI: 10.xxxx/psycgm.asddb
+              数据引用示例：作者等, ASD Database, 2026. DOI: 10.xxxx/psycgm.asddb
             </div>
           </div>
 
