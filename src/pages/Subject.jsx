@@ -26,6 +26,12 @@ export default function Subject() {
   }, [id]);
 
   function exportManifest(format = 'json') {
+    const user = JSON.parse(localStorage.getItem('userInfo') || 'null');
+    if (!user) {
+      alert('请先登录后再下载/导出数据');
+      window.location.href = '/login';
+      return;
+    }
     const manifest = files.map(f => ({
       file_id: f.file_id,
       participant_id: f.participant_id,
@@ -50,6 +56,17 @@ export default function Subject() {
     const keys = Object.keys(arr[0]);
     const lines = [keys.join(',')].concat(arr.map(o => keys.map(k => `"${String(o[k] ?? '')}"`).join(',')));
     return lines.join('\n');
+  }
+
+  // ★ 下载拦截：未登录跳转登录页
+  function handleDownload(url) {
+    const user = JSON.parse(localStorage.getItem('userInfo') || 'null');
+    if (!user) {
+      alert('请先登录后再下载数据');
+      window.location.href = '/login';
+      return;
+    }
+    window.open(url, '_blank');
   }
 
   if (loading || !p) return <div className="card">加载中...</div>;
@@ -96,7 +113,12 @@ export default function Subject() {
                 <div className="small">{f.modality} · {f.format} · {Math.round((f.size_bytes||0)/1024)} KB</div>
               </div>
               <div style={{display:'flex', gap:8, alignItems:'center'}}>
-                <a className="btn btn-ghost" href={f.download_url} target="_blank" rel="noreferrer">下载</a>
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => handleDownload(f.download_url)}
+                >
+                  下载
+                </button>
               </div>
             </li>
           ))}
